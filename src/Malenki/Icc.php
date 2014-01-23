@@ -399,13 +399,13 @@ class Icc
     
     private function extractTagOffset()
     {
-        return array_sum(unpack("C4", fread($this->fp, 4)));
+        return unpack("N*", fread($this->fp, 4));
     }
     
     
     private function extractTagSize()
     {
-        return array_sum(unpack("C4", fread($this->fp, 4)));
+        return unpack("N*", fread($this->fp, 4));
     }
     
     
