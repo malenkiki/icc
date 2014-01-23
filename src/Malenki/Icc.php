@@ -56,7 +56,7 @@ class Icc
 
     public function __get($name)
     {
-        if($name == 'header')
+        if(in_array($name, array('header', 'tag')))
         {
             return $this->$name;
         }
@@ -80,6 +80,7 @@ class Icc
         $this->fp = fopen($str_file, 'rb');
 
         $this->header = new \stdClass();
+        $this->tag = new \stdClass();
 
         $this->header->profileSize = $this->extractProfileSize();
         $this->header->preferedCmmType = $this->extractPreferedCmmType();
@@ -99,8 +100,19 @@ class Icc
         $this->header->profileCreator = $this->extractCreator();
         $this->header->profileId = $this->extractProfileId();
         $this->header->reservedBytes = $this->extractReservedBytes();
-        $this->header->tagCount = $this->extractTagCount();
-        $this->header->tagSignature = $this->extractTagSignature();
+        
+        $this->tag->count = $this->extractTagCount();
+        $this->tag->toc = array();
+
+        for($i = 0; $i < $this->tag->count; $i++)
+        {
+            $tag = new \stdClass();
+            $tag->signature = $this->extractTagSignature();
+            $tag->offset = $this->extractTagOffset();
+            $tag->size = $this->extractTagSize();
+            $this->tag->toc[] = $tag;
+        }
+
     }
 
 
@@ -383,6 +395,17 @@ class Icc
     private function extractTagSignature()
     {
         return array_pop(unpack("A4", fread($this->fp, 4)));
+    }
+    
+    private function extractTagOffset()
+    {
+        return array_sum(unpack("C4", fread($this->fp, 4)));
+    }
+    
+    
+    private function extractTagSize()
+    {
+        return array_sum(unpack("C4", fread($this->fp, 4)));
     }
     
     
