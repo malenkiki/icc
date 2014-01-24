@@ -103,6 +103,11 @@ class Icc
         'view' => 'viewingConditionsTag'
     );
 
+
+    protected $arr_tag_type = array(
+        'text'
+    );
+
     protected $fp = null;
 
     protected $header = null;
@@ -481,14 +486,26 @@ class Icc
 
     private function extractTag($tag)
     {
-        $out = new \stdClass();
-        
         fseek($this->fp, $tag->offset);
         
-        $out->boundary = array_pop(unpack('A4', fread($this->fp, 4)));
-            
-        $out->raw = fread($this->fp, $tag->size - 4);
+        $str_type = array_pop(unpack('A4', fread($this->fp, 4)));
+        $int_size = $tag->size - 4;
+
+        //var_dump($str_type);
+        $out = null;
+
+        if($str_type == 'chrm')
+        {
+            fread($this->fp, 4); // skip
+            $out = unpack('n*', fread($this->fp, 2)); //TODO test with other ICC files
+
+        }
+        elseif($str_type == 'text')
+        {
+            fread($this->fp, 4); // skip
+            $out = trim(array_pop(unpack('A*', fread($this->fp, $int_size))));
+        }
+
         return $out;
     }
-    
 }
