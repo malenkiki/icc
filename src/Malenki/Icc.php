@@ -77,6 +77,21 @@ class Icc
 
     public function __construct($str_file)
     {
+        if(!is_string($str_file) || strlen(trim($str_file)) == 0)
+        {
+            throw new \InvalidArgumentException('File name must be a valid string');
+        }
+
+        if(!file_exists($str_file))
+        {
+            throw new \RuntimeException(sprintf('The file "%s" does not exist.', $str_file));
+        }
+
+        if(!is_readable($str_file))
+        {
+            throw new \RuntimeException(sprintf('The file "%s" does not exist.', $str_file));
+        }
+
         $this->fp = fopen($str_file, 'rb');
 
         $this->header = new \stdClass();
@@ -88,7 +103,7 @@ class Icc
         $this->header->profileDeviceClass = $this->extractProfileDeviceClass();
         $this->header->colourSpace = $this->extractColourSpaceOfData();
         $this->header->pcs = $this->extractPcs();
-        $this->header->DateTime = $this->extractDateTime();
+        $this->header->dateTime = $this->extractDateTime();
         $this->header->profileFileSignature = $this->extractProfileFileSignature(); // should be 'acsp', if not error -> todo: do test for that
         $this->header->primaryPlatformSignature = $this->extractPrimaryPlatformSignature();
         $this->header->profileFlags = $this->extractProfileFlags();
@@ -133,14 +148,7 @@ class Icc
 
     private function extractProfileSize()
     {
-        $arr = unpack("C4", fread($this->fp, 4));
-        // Workaround
-        foreach($arr as $k => $b)
-        {
-            $arr[$k] = dechex($b);
-        }
-
-        return hexdec(implode('', $arr));
+        return array_sum(unpack("N*", fread($this->fp, 4)));
     }
 
     private function extractPreferedCmmType()
