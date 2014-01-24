@@ -103,6 +103,7 @@ class Icc
         
         $this->tag->count = $this->extractTagCount();
         $this->tag->toc = array();
+        $this->tag->data = array();
 
         for($i = 0; $i < $this->tag->count; $i++)
         {
@@ -113,6 +114,14 @@ class Icc
             $this->tag->toc[] = $tag;
         }
 
+        // TODO how to deal with offset == 0 ? (external CMM case)
+        if($this->tag->toc[0]->offset > 0)
+        {
+            foreach($this->tag->toc as $idx)
+            {
+                $this->tag->data[] = $this->extractTag($idx);
+            }
+        }
     }
 
 
@@ -399,14 +408,26 @@ class Icc
     
     private function extractTagOffset()
     {
-        return unpack("N*", fread($this->fp, 4));
+        return array_pop(unpack("N*", fread($this->fp, 4)));
     }
     
     
     private function extractTagSize()
     {
-        return unpack("N*", fread($this->fp, 4));
+        return array_pop(unpack("N*", fread($this->fp, 4)));
     }
     
+
+    private function extractTag($tag)
+    {
+        $out = new \stdClass();
+        
+        fseek($this->fp, $tag->offset);
+        
+        $out->boundary = array_pop(unpack('A4', fread($this->fp, 4)));
+            
+        $out->raw = fread($this->fp, $tag->size - 4);
+        return $out;
+    }
     
 }
