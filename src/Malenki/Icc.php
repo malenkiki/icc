@@ -50,6 +50,59 @@ class Icc
         'nmcl' => 'NamedColor profile'
     );
 
+
+    protected static $arr_tag_signature = array(
+        'A2B0' => 'AToB0Tag',
+        'A2B1' => 'AToB1Tag',
+        'A2B2' => 'AToB2Tag',
+        'bXYZ' => 'blueMatrixColumnTag',
+        'bTRC' => 'blueTRCTag',
+        'B2A0' => 'BToA0Tag',
+        'B2A1' => 'BToA1Tag',
+        'B2A2' => 'BToA2Tag',
+        'B2D0' => 'BToD0Tag',
+        'B2D1' => 'BToD1Tag',
+        'B2D2' => 'BToD2Tag',
+        'B2D3' => 'BToD3Tag',
+        'calt' => 'calibrationDateTimeTag',
+        'targ' => 'charTargetTag',
+        'chad' => 'chromaticAdaptationTag',
+        'chrm' => 'chromaticityTag',
+        'clro' => 'colorantOrderTag',
+        'clrt' => 'colorantTableTag',
+        'clot' => 'colorantTableOutTag',
+        'ciis' => 'colorimetricIntentImageStateTag',
+        'cprt' => 'copyrightTag',
+        'dmnd' => 'deviceMfgDescTag',
+        'dmdd' => 'deviceModelDescTag',
+        'D2B0' => 'DToB0Tag',
+        'D2B1' => 'DToB1Tag',
+        'D2B2' => 'DToB2Tag',
+        'D2B3' => 'DToB3Tag',
+        'gamt' => 'gamutTag',
+        'kTRC' => 'grayTRCTag',
+        'gXYZ' => 'greenMatrixColumnTag',
+        'gTRC' => 'greenTRCTag',
+        'lumi' => 'luminanceTag',
+        'meas' => 'measurementTag',
+        'wtpt' => 'mediaWhitePointTag',
+        'ncl2' => 'namedColor2Tag',
+        'resp' => 'outputResponseTag',
+        'rig0' => 'perceptualRenderingIntentGamutTag',
+        'pre0' => 'preview0Tag',
+        'pre1' => 'preview1Tag',
+        'pre2' => 'preview2Tag',
+        'desc' => 'profileDescriptionTag',
+        'pseq' => 'profileSequenceDescTag',
+        'psid' => 'profileSequenceIdentifierTag',
+        'rXYZ' => 'redMatrixColumnTag',
+        'rTRC' => 'redTRCTag',
+        'rig2' => 'saturationRenderingIntentGamutTag',
+        'tech' => 'technologyTag',
+        'vued' => 'viewingCondDescTag',
+        'view' => 'viewingConditionsTag'
+    );
+
     protected $fp = null;
 
     protected $header = null;
