@@ -501,15 +501,26 @@ class Icc
             
             fread($this->fp, 4); // skip
             
-            $out->numberOfDeviceChannels = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files 
+            $out->count = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files 
             $out->category = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files
             $out->channels = array();
             
-            for($i = 0; $i < $out->numberOfDeviceChannels; $i++)
+            for($i = 0; $i < $out->count; $i++)
             {
                 // TODO see table 31 from the specification to achieve this.
                 $out->channels[] = array_pop(unpack('n*', fread($this->fp, 8)));
             }
+
+        }
+        if($str_type == 'curv')
+        {
+            $out = new \stdClass();
+            $out->type = $str_type;
+            
+            fread($this->fp, 4); // skip
+
+            $out->count = unpack('N*', fread($this->fp, 4)); //TODO test it 
+            $out->raw = unpack('N*', fread($this->fp, $int_size - 4)); //TODO test it 
 
         }
         elseif($str_type == 'text')
@@ -518,6 +529,16 @@ class Icc
             $out->type = $str_type;
             fread($this->fp, 4); // skip
             $out->value = trim(array_pop(unpack('A*', fread($this->fp, $int_size))));
+        }
+        elseif($str_type == 'XYZ')
+        {
+            $out = new \stdClass();
+            $out->type = $str_type;
+            fread($this->fp, 4); // skip
+            $arr = unpack('n*', fread($this->fp, $int_size - 4));
+            $out->x = $arr[1] + $arr[2] / 0x10000;
+            $out->y = $arr[3] + $arr[4] / 0x10000;
+            $out->z = $arr[5] + $arr[6] / 0x10000;
         }
 
         return $out;

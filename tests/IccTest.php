@@ -65,6 +65,6 @@ class IccTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($icc->header->deviceManufacturer->exists);
         $this->assertFalse($icc->header->deviceModel->exists);
 
-        //var_dump($icc->tag);
+        //var_dump($icc->tag->data);
     }
 }
