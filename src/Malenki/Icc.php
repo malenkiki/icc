@@ -496,14 +496,28 @@ class Icc
 
         if($str_type == 'chrm')
         {
+            $out = new \stdClass();
+            $out->type = $str_type;
+            
             fread($this->fp, 4); // skip
-            $out = unpack('n*', fread($this->fp, 2)); //TODO test with other ICC files
+            
+            $out->numberOfDeviceChannels = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files 
+            $out->category = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files
+            $out->channels = array();
+            
+            for($i = 0; $i < $out->numberOfDeviceChannels; $i++)
+            {
+                // TODO see table 31 from the specification to achieve this.
+                $out->channels[] = array_pop(unpack('n*', fread($this->fp, 8)));
+            }
 
         }
         elseif($str_type == 'text')
         {
+            $out = new \stdClass();
+            $out->type = $str_type;
             fread($this->fp, 4); // skip
-            $out = trim(array_pop(unpack('A*', fread($this->fp, $int_size))));
+            $out->value = trim(array_pop(unpack('A*', fread($this->fp, $int_size))));
         }
 
         return $out;

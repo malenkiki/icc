@@ -64,5 +64,7 @@ class IccTest extends PHPUnit_Framework_TestCase
         //TODO profile flag
         $this->assertFalse($icc->header->deviceManufacturer->exists);
         $this->assertFalse($icc->header->deviceModel->exists);
+
+        //var_dump($icc->tag);
     }
 }
