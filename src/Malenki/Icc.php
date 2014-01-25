@@ -523,6 +523,17 @@ class Icc
             $out->raw = unpack('N*', fread($this->fp, $int_size - 4)); //TODO test it 
 
         }
+        // TODO What is this type?
+        if($str_type == 'desc')
+        {
+            $out = new \stdClass();
+            $out->type = $str_type;
+            
+            //fread($this->fp, 4); // skip
+
+            $out->raw = unpack('A*', fread($this->fp, $int_size)); //TODO test it 
+
+        }
         elseif($str_type == 'text')
         {
             $out = new \stdClass();
