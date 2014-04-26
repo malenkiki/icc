@@ -22,13 +22,12 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 namespace Malenki;
 
 /**
  * Handle ICC file to deal with color profile.
- * 
- * @author Michel Petit <petit.michel@gmail.com> 
+ *
+ * @author Michel Petit <petit.michel@gmail.com>
  * @license MIT
  */
 class Icc
@@ -49,7 +48,6 @@ class Icc
         'abst' => 'Abstract profile',
         'nmcl' => 'NamedColor profile'
     );
-
 
     protected static $arr_tag_signature = array(
         'A2B0' => 'AToB0Tag',
@@ -103,7 +101,6 @@ class Icc
         'view' => 'viewingConditionsTag'
     );
 
-
     protected $arr_tag_type = array(
         'text'
     );
@@ -114,39 +111,32 @@ class Icc
 
     public function __get($name)
     {
-        if(in_array($name, array('header', 'tag')))
-        {
+        if (in_array($name, array('header', 'tag'))) {
             return $this->$name;
         }
     }
 
-
     protected static function s15Fixed16Number($mix)
     {
-        if(is_array($mix))
-        {
+        if (is_array($mix)) {
             $whole_part = bindec(decbin($mix[0]).decbin($mix[1]));
             $fractionary_part = bindec(decbin($mix[2]).decbin($mix[3])) / 0x10000;
 
             return $whole_part + $fractionary_part;
-        } 
+        }
     }
-
 
     public function __construct($str_file)
     {
-        if(!is_string($str_file) || strlen(trim($str_file)) == 0)
-        {
+        if (!is_string($str_file) || strlen(trim($str_file)) == 0) {
             throw new \InvalidArgumentException('File name must be a valid string');
         }
 
-        if(!file_exists($str_file))
-        {
+        if (!file_exists($str_file)) {
             throw new \RuntimeException(sprintf('The file "%s" does not exist.', $str_file));
         }
 
-        if(!is_readable($str_file))
-        {
+        if (!is_readable($str_file)) {
             throw new \RuntimeException(sprintf('The file "%s" does not exist.', $str_file));
         }
 
@@ -173,13 +163,12 @@ class Icc
         $this->header->profileCreator = $this->extractCreator();
         $this->header->profileId = $this->extractProfileId();
         $this->header->reservedBytes = $this->extractReservedBytes();
-        
+
         $this->tag->count = $this->extractTagCount();
         $this->tag->toc = array();
         $this->tag->data = array();
 
-        for($i = 0; $i < $this->tag->count; $i++)
-        {
+        for ($i = 0; $i < $this->tag->count; $i++) {
             $tag = new \stdClass();
             $tag->signature = $this->extractTagSignature();
             $tag->offset = $this->extractTagOffset();
@@ -188,21 +177,17 @@ class Icc
         }
 
         // TODO how to deal with offset == 0 ? (external CMM case)
-        if($this->tag->toc[0]->offset > 0)
-        {
-            foreach($this->tag->toc as $idx)
-            {
+        if ($this->tag->toc[0]->offset > 0) {
+            foreach ($this->tag->toc as $idx) {
                 $this->tag->data[] = $this->extractTag($idx);
             }
         }
     }
 
-
     public function __destruct()
     {
         fclose($this->fp);
     }
-
 
     private function extractProfileSize()
     {
@@ -212,9 +197,9 @@ class Icc
     private function extractPreferedCmmType()
     {
         $arr = unpack("A4", fread($this->fp, 4));
+
         return array_pop($arr);
     }
-
 
     private function extractProfileVersion()
     {
@@ -229,7 +214,6 @@ class Icc
         return implode('.', $arr_out);
     }
 
-
     private function extractProfileDeviceClass()
     {
         $out = new \stdClass();
@@ -240,26 +224,24 @@ class Icc
         return $out;
     }
 
-
     // TODO add name too
     private function extractColourSpaceOfData()
     {
         $arr = unpack("A4", fread($this->fp, 4));
+
         return array_pop($arr);
     }
-
 
     private function extractPcs()
     {
         $arr = unpack("A4", fread($this->fp, 4));
+
         return array_pop($arr);
     }
-
 
     private function extractDateTime()
     {
         $arr = unpack("n*", fread($this->fp, 12));
-
 
         $date = new \stdClass();
         /*
@@ -289,15 +271,12 @@ class Icc
         return $date;
     }
 
-
-
     private function extractProfileFileSignature()
     {
         $arr = unpack("A4", fread($this->fp, 4));
+
         return array_pop($arr);
     }
-
-
 
     private function extractPrimaryPlatformSignature()
     {
@@ -305,28 +284,25 @@ class Icc
         $arr = unpack("A4", fread($this->fp, 4));
         $out->signature = array_pop($arr);
 
-        if(array_key_exists($out->signature, self::$arr_primary_platforms))
-        {
+        if (array_key_exists($out->signature, self::$arr_primary_platforms)) {
             $out->exists = true;
             $out->name = self::$arr_primary_platforms[$out->signature];
-        }
-        else
-        {
+        } else {
             $out->exists = false;
             $out->name = null;
         }
 
         return $out;
     }
-    
-    
+
     // TODO
     private function extractProfileFlags()
     {
         $arr = unpack("C4", fread($this->fp, 4));
+
         return $arr;
     }
-    
+
     //TODO get the string, find example ICC file with that
     private function extractManufacturer()
     {
@@ -335,19 +311,16 @@ class Icc
         $bin = fread($this->fp, 4);
         $arr = unpack("A4", $bin);
 
-        if(array_sum($arr) == 0)
-        {
+        if (array_sum($arr) == 0) {
             $out->exists = false;
-        }
-        else
-        {
+        } else {
             $out->exists = true;
             $out->signature = unpack("A4", $bin);
         }
 
         return $out;
     }
-    
+
     //TODO get the string, find example ICC file with that
     private function extractModel()
     {
@@ -356,21 +329,16 @@ class Icc
         $bin = fread($this->fp, 4);
         $arr = unpack("A4", $bin);
 
-        if(array_sum($arr) == 0)
-        {
+        if (array_sum($arr) == 0) {
             $out->exists = false;
-        }
-        else
-        {
+        } else {
             $out->exists = true;
             $out->signature = unpack("A4", $bin);
         }
 
         return $out;
     }
-    
-    
-    
+
     // TODO
     private function extractAttributes()
     {
@@ -379,19 +347,15 @@ class Icc
         $bin = fread($this->fp, 8);
         $arr = unpack("C8", $bin);
 
-        foreach($arr as $k => $v)
-        {
+        foreach ($arr as $k => $v) {
             $arr[$k] = decbin($v);
         }
 
         $out->raw = implode('', $arr);
         /*
-        if(array_sum($arr) == 0)
-        {
+        if (array_sum($arr) == 0) {
             $out->exists = false;
-        }
-        else
-        {
+        } else {
             $out->exists = true;
             $out->signature = unpack("A4", $bin);
         }*/
@@ -399,19 +363,19 @@ class Icc
         return $out;
     }
 
-
     // TODO
     private function extractRenderingIntent()
     {
         $arr = unpack("C4", fread($this->fp, 4));
+
         return $arr;
     }
-    
+
     // TODO
     private function extractPcsIlluminant()
     {
         $arr = unpack("n*", fread($this->fp, 12));
-        
+
         $out = new \stdClass();
         $out->x = $arr[1] + $arr[2] / 0x10000;
         $out->y = $arr[3] + $arr[4] / 0x10000;
@@ -424,9 +388,9 @@ class Icc
         $out->y = self::s15Fixed16Number($arr[1]);
         $out->z = self::s15Fixed16Number($arr[2]);
          */
+
         return $out;
     }
-    
 
     //TODO get the string, find example ICC file with that
     private function extractCreator()
@@ -436,113 +400,99 @@ class Icc
         $bin = fread($this->fp, 4);
         $arr = unpack("A4", $bin);
 
-        if(array_sum($arr) == 0)
-        {
+        if (array_sum($arr) == 0) {
             $out->exists = false;
-        }
-        else
-        {
+        } else {
             $out->exists = true;
             $out->signature = unpack("A4", $bin);
         }
 
         return $out;
     }
-    
+
     // TODO
     private function extractProfileId()
     {
         return array_pop(unpack("h*", fread($this->fp, 16)));
     }
-    
-    
+
     // TODO
     private function extractReservedBytes()
     {
         return array_pop(unpack("C28", fread($this->fp, 28)));
     }
-    
+
     private function extractTagCount()
     {
         return array_sum(unpack("C4", fread($this->fp, 4)));
     }
-    
+
     private function extractTagSignature()
     {
         return array_pop(unpack("A4", fread($this->fp, 4)));
     }
-    
+
     private function extractTagOffset()
     {
         return array_pop(unpack("N*", fread($this->fp, 4)));
     }
-    
-    
+
     private function extractTagSize()
     {
         return array_pop(unpack("N*", fread($this->fp, 4)));
     }
-    
 
     private function extractTag($tag)
     {
         fseek($this->fp, $tag->offset);
-        
+
         $str_type = array_pop(unpack('A4', fread($this->fp, 4)));
         $int_size = $tag->size - 4;
 
         //var_dump($str_type);
         $out = null;
 
-        if($str_type == 'chrm')
-        {
+        if ($str_type == 'chrm') {
             $out = new \stdClass();
             $out->type = $str_type;
-            
+
             fread($this->fp, 4); // skip
-            
-            $out->count = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files 
+
+            $out->count = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files
             $out->category = array_pop(unpack('n*', fread($this->fp, 2))); //TODO test with other ICC files
             $out->channels = array();
-            
-            for($i = 0; $i < $out->count; $i++)
-            {
+
+            for ($i = 0; $i < $out->count; $i++) {
                 // TODO see table 31 from the specification to achieve this.
                 $out->channels[] = array_pop(unpack('n*', fread($this->fp, 8)));
             }
 
         }
-        if($str_type == 'curv')
-        {
+        if ($str_type == 'curv') {
             $out = new \stdClass();
             $out->type = $str_type;
-            
+
             fread($this->fp, 4); // skip
 
-            $out->count = unpack('N*', fread($this->fp, 4)); //TODO test it 
-            $out->raw = unpack('N*', fread($this->fp, $int_size - 4)); //TODO test it 
+            $out->count = unpack('N*', fread($this->fp, 4)); //TODO test it
+            $out->raw = unpack('N*', fread($this->fp, $int_size - 4)); //TODO test it
 
         }
         // TODO What is this type?
-        if($str_type == 'desc')
-        {
+        if ($str_type == 'desc') {
             $out = new \stdClass();
             $out->type = $str_type;
-            
+
             //fread($this->fp, 4); // skip
 
-            $out->raw = unpack('A*', fread($this->fp, $int_size)); //TODO test it 
+            $out->raw = unpack('A*', fread($this->fp, $int_size)); //TODO test it
 
-        }
-        elseif($str_type == 'text')
-        {
+        } elseif ($str_type == 'text') {
             $out = new \stdClass();
             $out->type = $str_type;
             fread($this->fp, 4); // skip
             $out->value = trim(array_pop(unpack('A*', fread($this->fp, $int_size))));
-        }
-        elseif($str_type == 'XYZ')
-        {
+        } elseif ($str_type == 'XYZ') {
             $out = new \stdClass();
             $out->type = $str_type;
             fread($this->fp, 4); // skip
